@@ -32,7 +32,6 @@ Work in progress description on work below:
 * Dokumentera alltid systemglobala regler (t ex att alla meddelanden över bussen skall vara i JSON-format)
 * Dokumentera allra minst hur alla delar hänger ihop och pratar med varandra
 * Ha alltid en systemkarta i vektorformat uppdaterad
-* Minimera antalet skrivningar i varje enskild microinstans (men det är som kontrast inte särskilt viktigt att antalet totala skrivningar i hela systemet hålls nere)
 * Varje microinstans skall hållas “liten”. Allra minst skall en, ensam utvecklare kunna ha 100% koll på hela microinstansen. Målsättning: ~80 timmar för full rewrite (Extrem gissning, bör revideras snart!).
 * Färdiga containers för att snabbt kunna få upp en snurrande version av systemet i sin helhet
 * Det skall alltid finnas EN och endast EN microinstans som äger “sanningen” om en viss data. T ex “users” kan finnas i flera olika microinstanser av GUI-visningsskäl eller annat, men endast en microinstans äger rätten att ändra i users rådata. Om någon form av diskrepans eller osäkerhet uppstår skall alla instanser som inte äger “sanningen” radera sin data och efterfråga en ny råkopia av den microinstans som äger “sanningen”. (Denna enda microinstans som äger sanningen kan dock skalas upp och vara flera parallella…)
@@ -41,3 +40,5 @@ Work in progress description on work below:
 ```json
 {"msgUuid": "v4", "payload": "xxx", "senderTimestamp": "2016-07-22 14:29:14.123"}
 ```
+* Alla microinstanser skall designas så att flera parallella likadana skall kunna köras. T ex skall data som ska persisteras (inte temporär cachedata alltså) ALLTID skickas via en publish på bussen och skrivas till data store när det kommer ett meddelande på subscribe på bussen. På så sätt kan hur många microinstanser som helt skapas, tills flaskhalsen blir skrivhastigheten på varje enskild instans.
+* Minimera antalet skrivningar i varje enskild microinstans (men det är som kontrast inte särskilt viktigt att antalet totala skrivningar i hela systemet hålls nere) (Med tanke på ovanstående)
