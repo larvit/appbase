@@ -5,6 +5,10 @@ RUN echo 'deb http://www.rabbitmq.com/debian/ testing main' | tee /etc/apt/sourc
 RUN wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | apt-key add -
 RUN apt-get update && apt-get install -y rabbitmq-server
 
+# Must manually set hostname for rabbit or else the added users down below wont work
+COPY ["rabbitmq-env.conf", "/etc/rabbitmq/rabbitmq-env.conf"]
+RUN chmod 755 /etc/rabbitmq/rabbitmq-env.conf
+
 # Create admin user that can be accessed from the outside
 
 ## Start up the rabbitmq server
