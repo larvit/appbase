@@ -38,4 +38,6 @@ Work in progress description on work below:
 * Det skall alltid finnas EN och endast EN microinstans som äger “sanningen” om en viss data. T ex “users” kan finnas i flera olika microinstanser av GUI-visningsskäl eller annat, men endast en microinstans äger rätten att ändra i users rådata. Om någon form av diskrepans eller osäkerhet uppstår skall alla instanser som inte äger “sanningen” radera sin data och efterfråga en ny råkopia av den microinstans som äger “sanningen”. (Denna enda microinstans som äger sanningen kan dock skalas upp och vara flera parallella…)
 * Alla microinstanser måste alltid kunna hantera dubletter (eller fler än dubletter) av samma meddelanden.
 * Alla meddelanden som skickas över köhanteraren skall ha samma innehållsarkitektur:
-{‘msgUuid’: xxx, ‘payload’: xxx, ‘senderTimestamp’: xxx}
+```json
+{"msgUuid": "v4", "payload": "xxx", "senderTimestamp": "2016-07-22 14:29:14.123"}
+```
