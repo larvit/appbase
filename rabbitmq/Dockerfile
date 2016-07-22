@@ -14,7 +14,7 @@ RUN service rabbitmq-server start \
 	&& rabbitmqctl add_user test test \
 
 ## Give the test user admin possibilities
- 	&& rabbitmqctl set_user_tags test administrator \
+	&& rabbitmqctl set_user_tags test administrator \
 
 ## Set permissions and stuff... dont know exactly what this does
 	&& rabbitmqctl set_permissions -p / test ".*" ".*" ".*" \
