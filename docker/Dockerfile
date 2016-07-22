@@ -7,11 +7,17 @@ RUN apt-get update && apt-get install -y rabbitmq-server
 
 # Create admin user that can be accessed from the outside
 
+## Start up the rabbitmq server
+RUN service rabbitmq-server start \
+
 ## Last two parameters is username and password
-RUN rabbitmqctl add_user test test
+	&& rabbitmqctl add_user test test \
 
 ## Give the test user admin possibilities
-RUN rabbitmqctl set_user_tags test administrator
+ 	&& rabbitmqctl set_user_tags test administrator \
 
 ## Set permissions and stuff... dont know exactly what this does
-RUN rabbitmqctl set_permissions -p / test ".*" ".*" ".*"
+	&& rabbitmqctl set_permissions -p / test ".*" ".*" ".*" \
+
+## Stop the rabbitmq-server since this should be started in each container
+	&& service rabbitmq-server stop
