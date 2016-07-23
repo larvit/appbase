@@ -1,52 +1,87 @@
 'use strict';
 
-const	conStr	= 'amqp://test:test@172.17.0.2/',
-	amqp	= require('amqplib/callback_api');
+const	log	= require('winston');
 
-// Publisher
-function publisher() {
-	amqp.connect(conStr, function(err, conn) {
-		if (err) throw err;
+// Add support for daily rotate file
+log.transports.DailyRotateFile = require('winston-daily-rotate-file');
 
-		conn.createChannel(function(err, ch) {
-			if (err) throw err;
+// Handle logging from config file
+log.remove(log.transports.Console);
+try {
+	const logConf = require(__dirname + '/config/log.json');
 
-			ch.assertExchange('autobahn', 'fanout', {durable: false});
+	for (const logName of Object.keys(logConf)) {
+		let logInstances = logConf[logName];
 
-			console.log('Sending message');
-			ch.publish('autobahn', '', new Buffer('Message content'));
-		});
+		if (typeof logInstances !== Array) {
+			logInstances = [logInstances];
+		}
+
+		for (let i = 0; logInstances[i] !== undefined; i ++) {
+			log.add(log.transports[logName], logInstances[i]);
+		}
+	}
+} catch(err) {
+	log.add(log.transports.Console, {
+		'colorize':	true,
+		'timestamp':	true,
+		'level':	'info',
+		'json':	false
 	});
+	log.warn('Could not load log config from file "' + __dirname + '/config/log.json" falling back to console only');
 }
 
-// Subscriber
-function subscriber(subNr) {
-	amqp.connect(conStr, function(err, conn) {
-		if (err) throw err;
+// Application specific stuff below
+function amqpTest() {
+	const	conStr	= 'amqp://test:test@172.17.0.2/',
+		amqp	= require('amqplib/callback_api');
 
-		conn.createChannel(function(err, ch) {
+	// Publisher
+	function publisher() {
+		amqp.connect(conStr, function(err, conn) {
 			if (err) throw err;
 
-			ch.assertExchange('autobahn', 'fanout', {durable: false});
+			conn.createChannel(function(err, ch) {
+				if (err) throw err;
 
-			ch.assertQueue('', {exclusive: true}, function(err, q) {
-				ch.bindQueue(q.queue, 'autobahn', '');
+				ch.assertExchange('autobahn', 'fanout', {durable: false});
 
-				ch.consume(q.queue, function(msg) {
-					console.log('nr ' + subNr + ' Received message!!! :D');
-					console.log(msg.content.toString());
-					console.log('------');
+				log.info('Sending message');
+				ch.publish('autobahn', '', new Buffer('Message content'));
+			});
+		});
+	}
+
+	// Subscriber
+	function subscriber(subNr) {
+		amqp.connect(conStr, function(err, conn) {
+			if (err) throw err;
+
+			conn.createChannel(function(err, ch) {
+				if (err) throw err;
+
+				ch.assertExchange('autobahn', 'fanout', {durable: false});
+
+				ch.assertQueue('', {exclusive: true}, function(err, q) {
+					ch.bindQueue(q.queue, 'autobahn', '');
+
+					ch.consume(q.queue, function(msg) {
+						log.info('nr ' + subNr + ' Received message!!! :D');
+						log.info(msg.content.toString());
+						log.info('------');
+					});
 				});
 			});
 		});
-	});
+	}
+
+	subscriber(1);
+	subscriber(2);
+	subscriber(3);
+
+	setInterval(function() {
+		log.info('publishing');
+		publisher();
+	}, 2000);
 }
-
-subscriber(1);
-subscriber(2);
-subscriber(3);
-
-setInterval(function() {
-	console.log('publishing');
-	publisher()
-}, 2000);
+amqpTest();

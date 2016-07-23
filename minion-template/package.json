@@ -9,6 +9,8 @@
   "author": "Lilleman <lilleman@larvit.se>",
   "license": "ISC",
   "dependencies": {
-    "amqplib": "^0.4.2"
+    "amqplib": "^0.4.2",
+    "winston": "^2.2.0",
+    "winston-daily-rotate-file": "^1.1.5"
   }
 }
