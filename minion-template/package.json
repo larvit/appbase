@@ -1,7 +1,7 @@
 {
   "name": "minion-template",
   "version": "1.0.0",
-  "description": "Template for building minions (micro processes for Larv IT application structure\"",
+  "description": "Template for building minions (micro processes for Larv IT application structure)",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
