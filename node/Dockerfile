@@ -10,4 +10,4 @@ RUN apt-get install -y \
 COPY repo /srv/
 
 # Run npm i in the place
-#RUN cd /srv &&
+RUN cd /srv && npm i
