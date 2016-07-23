@@ -2,6 +2,9 @@
 
 const	log	= require('winston');
 
+// Set current working directory
+process.cwd(__dirname);
+
 // Add support for daily rotate file
 log.transports.DailyRotateFile = require('winston-daily-rotate-file');
 
