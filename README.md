@@ -1,5 +1,9 @@
 # appbase
 
+## What is this?
+
+This repository is a documentation project about a way to design a microservice information structure.
+
 Work in progress description on work below:
 
 (Gäller endast större applikationer, för mindre och medelstora webbprojekt fungerar nuvarande upplägg bra)
