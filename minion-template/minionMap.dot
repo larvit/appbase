@@ -1,18 +1,36 @@
 digraph {
 	subgraph cluster_0 {
 		style=rounded;
-		label="Minion";
-
-		Datastore [shape="rect", label="Datastore\n\nEach minion should have\ntheir own datastore and never\ndepend on asking other minions\nfor data needed to producer\nthe output for each input"];
+		label="Minion\n\nOr as other calls it: microservice. A minion should be small\nenough that a single developer could rewrite it in full in\n80 hours. A minion should be designed so it could be\nduplicated within the same system and cooperate with\nother minions of the same type seamlessly.";
 
 		Application [label="Application\n\nThe actual minion functions"];
+		Datawriter [label="Datawriter\n(0, 1 or many. One for each Datastore)\n\nTo make sure all minions of the same type are\nfully synced, all data must be written through\npublish -> subscribe -> datawriter -> datastore.\nMust have acknowledged data written to Datastore\nbefore ACK:ing queMsg. Data writing is\nthe bottleneck of every minion!\nKeep it to a minimum."];
+		Datastore [label="Datastore\n(0, 1 or many)\n\nEach minion should have\ntheir own datastore and never\ndepend on asking other minions\nfor data needed to producer\nthe output for each input"];
 
-		Application -> Datastore;
-		Datastore -> Application;
+		Datawriter -> Datastore[label="socket/tcp"];
+		Datastore -> Application[label="socket/tcp"];
 	}
 
-	pubsub [shape="none", label="PUB/SUB\nfrom autoahn"];
+	subgraph cluster_1 {
+		label="Queue handler\n\nCould be RabbitMQ, Kafka, ActiveMQ or even simple direct connections through ZeroMQ";
 
-	pubsub -> Application;
-	Application -> pubsub;
+		publish [shape="oval", label="PUBLISH\n(0, 1 or many)\n\nSend a broadcast message\nto all other minions that\nwants to listen"];
+		subscribe [shape="oval", label="SUBSCRIBE\n(0, 1 or many)\n\nListen to publishes\nfrom minions that\nthis minion is interested in."];
+		queuein [shape="oval", label="QUEUE IN\n(0, 1 or many)\n\nA direct queue to this\nspecific minion.\nEach message in this queue\nwill only be processed once.\nIf there are several minions\nof the same type, they\ncan consume different\nmessages in parallel."];
+		queueout [shape="oval", label="QUEUE OUT\n(0, 1 or many)\n\nA direct queue\nto a minion."];
+	}
+
+	queMsg [shape="react", label="queMsg\n\nA queue message should always be a JSON,\nshould always have a UUID, should always\nbe persistent, should always require ACK.\nA minion should always accept queMsg\ndulicates without issues."];
+
+	public [shape="none", label="Public interaction\n\nInteract with the outside\nworld. Could be a REST API,\na web GUI, raw data stream,\nfile handler etc."];
+
+	Application -> publish[label="queMsg"];
+	Application -> public[label="various"];
+	Application -> queueout[label="queMsg"];
+
+	public -> Application[label="various"];
+	queuein -> Application[label="queMsg"];
+	subscribe -> Application[label="queMsg"];
+	subscribe -> Datawriter[label="queMsg"];
+	publish -> subscribe[label="queMsg"];
 }
