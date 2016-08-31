@@ -6,9 +6,11 @@ digraph {
 		Application [label="Application\n\nThe actual minion functions"];
 		Datawriter [label="Datawriter\n(0, 1 or many. One for each Datastore)\n\nTo make sure all minions of the same type are\nfully synced, all data must be written through\npublish -> subscribe -> datawriter -> datastore.\nMust have acknowledged data written to Datastore\nbefore ACK:ing queMsg. Data writing is\nthe bottleneck of every minion!\nKeep it to a minimum."];
 		Datastore [label="Datastore\n(0, 1 or many)\n\nEach minion should have\ntheir own datastore and never\ndepend on asking other minions\nfor data needed to producer\nthe output for each input"];
+		Datadumper [label="Datadumper\n\nWill deliver a complete\ndata dump to sync a new\nminion of the same type."];
 
 		Datawriter -> Datastore[label="socket/tcp"];
 		Datastore -> Application[label="socket/tcp"];
+		Datastore -> Datadumper[label="socket/tcp"];
 	}
 
 	subgraph cluster_1 {
@@ -20,9 +22,13 @@ digraph {
 		queueout [shape="oval", label="QUEUE OUT\n(0, 1 or many)\n\nA direct queue\nto a minion."];
 	}
 
-	queMsg [shape="react", label="queMsg\n\nA queue message should always be a JSON,\nshould always have a UUID, should always\nbe persistent, should always require ACK.\nA minion should always accept queMsg\ndulicates without issues."];
+	queMsg [shape="rect", label="queMsg\n\nA queue message should always be a JSON,\nshould always have a UUID, should always\nbe persistent, should always require ACK.\nA minion should always accept queMsg\ndulicates without issues."];
 
 	public [shape="none", label="Public interaction\n\nInteract with the outside\nworld. Could be a REST API,\na web GUI, raw data stream,\nfile handler etc."];
+
+	otherMinion [shape="rect", label="Other minion of same type"];
+
+	Datadumper -> otherMinion[label="http"];
 
 	Application -> publish[label="queMsg"];
 	Application -> public[label="various"];
