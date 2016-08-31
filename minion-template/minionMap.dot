@@ -1,0 +1,18 @@
+digraph {
+	subgraph cluster_0 {
+		style=rounded;
+		label="Minion";
+
+		Datastore [shape="rect", label="Datastore\n\nEach minion should have\ntheir own datastore and never\ndepend on asking other minions\nfor data needed to producer\nthe output for each input"];
+
+		Application [label="Application\n\nThe actual minion functions"];
+
+		Application -> Datastore;
+		Datastore -> Application;
+	}
+
+	pubsub [shape="none", label="PUB/SUB\nfrom autoahn"];
+
+	pubsub -> Application;
+	Application -> pubsub;
+}
